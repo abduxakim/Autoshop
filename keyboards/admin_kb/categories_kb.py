@@ -12,11 +12,12 @@ from keyboards.admin_kb.admin_kb import back_button
 def get_category_action_kb():
     return ReplyKeyboardMarkup(
         keyboard=[
-             [
-                KeyboardButton(text="📂 Показать категории товаров"),
-                KeyboardButton(text="➕ Добавить категорию"),
+            [
+                KeyboardButton(text="📦 Выбрать категорию товара"),
+                KeyboardButton(text="🛠 Управление категориями"),
             ],
-            [back_button()]  # видимая кнопка Назад
+            [KeyboardButton(text="➕ Добавить категорию")],
+            [back_button()]
         ],
         resize_keyboard=True
     )
