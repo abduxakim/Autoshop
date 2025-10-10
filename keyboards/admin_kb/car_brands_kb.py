@@ -9,21 +9,24 @@ from keyboards.admin_kb.admin_kb import back_button
 
 
 # Список car brands
-def get_car_brands_kb(name_field="name"):
+# --- Inline список брендов ---
+def get_car_brands_kb():
     brands = get_car_brands()
-
     keyboard = []
     row = []
+
     for i, brand in enumerate(brands, start=1):
-        text = brand.get(name_field, brand.get("name"))
-        row.append(KeyboardButton(text=text))
+        text = brand.get("name", "")
+        row.append(InlineKeyboardButton(text=text, callback_data=f"choose_brand:{brand['id']}"))
         if i % 2 == 0:
-            keyboard.append(row); row = []
+            keyboard.append(row)
+            row = []
     if row:
         keyboard.append(row)
 
-    keyboard.append([back_button()])  # вернёмся в categories (логика в handler)
-    return ReplyKeyboardMarkup(keyboard=keyboard, resize_keyboard=True)
+    keyboard.append([InlineKeyboardButton(text="🔙 Назад", callback_data="back:brands_menu")])
+
+    return InlineKeyboardMarkup(inline_keyboard=keyboard)
 
 
 # 🚘 Меню действий с брендами авто (отсюда — в список брендов или добавить)

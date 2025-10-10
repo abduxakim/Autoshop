@@ -19,15 +19,24 @@ admin_car_brands_router = Router()
 class AddCarBrands(StatesGroup):
     name = State()
 
-# Показать все категории -> список категорий, при возврате хотим попасть в "action"
+
+# --- Показать бренды ---
 @admin_car_brands_router.message(F.text == "📂 Показать бренды авто")
-async def show_all_categories(message: Message):
-    user = message.from_user.id
-    BACK_STACKS[user].append("actaction_categoriesion")   # parent of categories = action
-    await message.answer("Вот список брендов авто  📂", reply_markup=get_car_brands_kb("name"))
+async def show_brands(message: Message):
+    await message.answer(
+        "Список брендов 🚘:",
+        reply_markup=get_car_brands_kb()
+    )
 
 
-# 1. Запрашиваем название бренда
+# --- Добавить бренд ---
+@admin_car_brands_router.message(F.text == "➕ Добавить бренд авто")
+async def add_brand(message: Message):
+    await message.answer("Введите название нового бренда:")
+    # Здесь можно использовать FSM для пошагового ввода
+    # Например, admin_fsm.AddBrandState.waiting_for_name.set()
+
+"""# 1. Запрашиваем название бренда
 @admin_car_brands_router.message(F.text == "➕ Добавить бренд авто")
 async def add_car_brands_handler(message:Message,state:FSMContext):
     await message.answer("Введите название бренда авто")
@@ -50,7 +59,7 @@ async def save_car_brands_name(message: Message, state: FSMContext):
         reply_markup=get_admin_main_menu()
     )
     await state.clear()
-
+"""
 
 
 

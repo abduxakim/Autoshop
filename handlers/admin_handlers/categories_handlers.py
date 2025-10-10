@@ -1,4 +1,7 @@
 # handlers/admin_handlers/categories_handlers.py
+#TODO возможно придется менть логику choose_category_for_brands так как при Молярки может выйти что-то другое
+
+
 
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
@@ -15,7 +18,7 @@ from keyboards.admin_kb.categories_kb import (
     get_post_delete_kb,
     get_confirm_delete_kb
 )
-from keyboards.admin_kb.car_brands_kb import get_car_brands_action_kb
+from keyboards.admin_kb.car_brands_kb import get_car_brands_kb,get_car_brands_action_kb
 
 # --- Импорт функций работы с базой ---
 from database.admin_db.categories_db import (
@@ -48,19 +51,43 @@ class AddCategory(StatesGroup):
 # =================================================
 #   ПОКАЗАТЬ КАТЕГОРИИ
 # =================================================
-@admin_categories_router.message(F.text == "📂 Показать категории товаров")
-async def show_all_categories(message: Message):
-    """
-    Показывает администратору список всех категорий для управления (Update/Delete)
-    """
+# --- 1. Управление категориями ---
+@admin_categories_router.message(F.text == "🛠 Управление категориями")
+async def manage_categories(message: Message):
     user_id = message.from_user.id
     BACK_STACKS[user_id].append("action_categories")
 
     await message.answer(
-        "Вот список категорий 📂",
+        "Список категорий для управления 🛠",
         reply_markup=build_categories_kb(action="manage", lang="ru")
     )
 
+# --- 2. Выбор категории для брендов ---
+@admin_categories_router.message(F.text == "📦 Выбрать категорию товара")
+async def choose_category_for_brands(message: Message):
+    user_id = message.from_user.id
+    BACK_STACKS[user_id].append("choose_categories")
+
+    await message.answer(
+        "Выберите категорию товара 📦:",
+        reply_markup=build_categories_kb(action="choose", lang="ru")
+    )
+
+# --- 3. После выбора категории (callback choose_cat:) ---
+@admin_categories_router.callback_query(F.data.startswith("choose_cat:"))
+async def choose_category_callback(callback: CallbackQuery):
+    category_id = int(callback.data.split(":")[1])
+    name = next((c["name_ru"] for c in get_categories() if c["id"] == category_id), "Неизвестно")
+
+    await callback.message.edit_text(
+        text=f"Вы выбрали категорию ={name} ✅\n\nТеперь выберите действие с брендами:",
+        reply_markup=None
+    )
+
+    await callback.message.answer(
+        text="Выберите действие с брендами 🚘:",
+        reply_markup=get_car_brands_action_kb()
+    )
 
 @admin_categories_router.callback_query(F.data.startswith("choose_cat:"))
 async def choose_car_brand(callback: CallbackQuery, state: FSMContext):
@@ -76,14 +103,12 @@ async def choose_car_brand(callback: CallbackQuery, state: FSMContext):
     user_id = callback.from_user.id
     BACK_STACKS[user_id].append("categories")
 
-    await callback.message.edit_text(
-        "Выберите марку автомобиля 🚘:",
-        reply_markup=get_car_brands_action_kb()
+    await callback.message.answer(
+    "Выберите марку автомобиля 🚘:",
+    reply_markup=get_car_brands_kb()
     )
+    await callback.message.delete()
     await callback.answer()
-
-
-
 
 
 # =================================================
@@ -138,12 +163,6 @@ async def add_category_uz(message: Message, state: FSMContext):
 # =================================================
 #   УДАЛИТЬ КАТЕГОРИЮ
 # =================================================
-"""@admin_categories_router.message(F.text == "🗑️ Удалить категорию")
-async def delete_category_handler(message: Message, state: FSMContext):
-    ""Показывает список категорий для удаления""
-    kb = build_categories_kb(action="delete")
-    await message.answer("Выберите категорию для удаления:", reply_markup=kb)"""
-
 
 # Нажали на 🗑 — спрашиваем подтверждение
 @admin_categories_router.callback_query(F.data.startswith("delete_cat:"))
@@ -194,13 +213,6 @@ async def process_delete_category(callback: CallbackQuery):
 # =================================================
 #   ОБНОВИТЬ КАТЕГОРИЮ
 # =================================================
-@admin_categories_router.message(F.text == "♻️ Обновить категорию")
-async def process_update_category(message: Message):
-    """Показывает список категорий для обновления"""
-    kb = build_categories_kb(action="update")
-    await message.answer("Выберите категорию для редактирования:", reply_markup=kb)
-
-
 @admin_categories_router.callback_query(F.data.startswith("update_cat:"))
 async def update_category_choose_lang(callback: CallbackQuery, state: FSMContext):
     """Выбор языка для обновления категории"""
