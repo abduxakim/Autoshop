@@ -8,6 +8,22 @@ from database.admin_db.car_brands_db import    get_car_brands
 from keyboards.admin_kb.admin_kb import back_button 
 
 
+# 🚘 Меню действий с брендами авто (отсюда — в список брендов или добавить)
+def get_car_brands_action_kb():
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(text="📂 Показать бренды авто", callback_data="show_brands"),
+                InlineKeyboardButton(text="🛠 Управление брендами авто", callback_data="manage_brand"),
+             
+             ],
+            [InlineKeyboardButton(text="➕ Добавить бренд авто", callback_data="add_brand")],
+            [InlineKeyboardButton(text="🔙 Назад", callback_data="back:categories")]
+        ]
+    )
+
+
+
 # Список car brands
 # --- Inline список брендов ---
 def get_car_brands_kb():
@@ -29,13 +45,6 @@ def get_car_brands_kb():
     return InlineKeyboardMarkup(inline_keyboard=keyboard)
 
 
-# 🚘 Меню действий с брендами авто (отсюда — в список брендов или добавить)
-def get_car_brands_action_kb():
-    return InlineKeyboardMarkup(
-        inline_keyboard=[
-            [InlineKeyboardButton(text="📂 Показать бренды авто", callback_data="show_brands")],
-            [InlineKeyboardButton(text="➕ Добавить бренд авто", callback_data="add_brand")],
-            [InlineKeyboardButton(text="🔙 Назад", callback_data="back:categories")]
-        ]
-    )
+
+
 
