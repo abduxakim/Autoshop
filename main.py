@@ -1,3 +1,4 @@
+#logging.basicConfig(level=logging.INFO) чтобы видеть логи
 import asyncio
 import logging
 from aiogram import Bot, Dispatcher
